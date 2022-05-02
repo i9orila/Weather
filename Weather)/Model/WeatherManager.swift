@@ -28,7 +28,7 @@ struct WeatherManager {
                     return
                 }
                 if let safeData = data {
-                    self.parseJSON(weatherData: safeData)
+                  let weather = self.parseJSON(weatherData: safeData)
                 }
             }
             // 4 start the task
@@ -36,7 +36,7 @@ struct WeatherManager {
         }
         
     }
-    func parseJSON(weatherData: Data) {
+    func parseJSON(weatherData: Data) -> WeatherModel {
         let decoder = JSONDecoder()
         
         do {
