@@ -32,8 +32,8 @@ struct WeatherModel {
         case 801...804:
             return "cloud"
         default:
-            return "sun.min"
+            return "sun.max"
         }
     }
 }
-// jkk
+

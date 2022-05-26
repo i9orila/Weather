@@ -7,10 +7,11 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController, UITextFieldDelegate {
+class WeatherViewController: UIViewController {
     
-    let weatherManager = WeatherManager()
-
+    var weatherManager = WeatherManager()
+    
+    
     @IBOutlet weak var conditionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityLabel: UILabel!
@@ -19,11 +20,17 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         searchTextField.delegate = self
+        weatherManager.delegate = self
     }
+}
 
+//MARK: - UITextFielDelegate
+
+extension WeatherViewController: UITextFieldDelegate {
+    
     @IBAction func searchPressed(_ sender: UIButton) {
         searchTextField.endEditing(true) // убирает клавиатуру при нажатии кнопри поиск search
-       print (searchTextField.text!)
+        print (searchTextField.text!)
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {  //функция срабатывания кнопки поиск на клавиатуре, нужен протокол UI Text field delegate
         searchTextField.endEditing(true) // убирает клавиатуру при нажатии кнопри return/go
@@ -47,3 +54,19 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     }
 }
 
+//MARK: - WeatherManagerDelegate
+
+extension WeatherViewController: WeatherManagerDelegate {
+    
+    func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
+        DispatchQueue.main.async {
+            self.temperatureLabel.text = weather.temperatureString
+            self.conditionImageView.image = UIImage(systemName: weather.conditionName)
+        }
+        print(weather.temperature)
+    }
+    
+    func didFailWithError(error: Error) {
+        print(error)
+    }
+}
