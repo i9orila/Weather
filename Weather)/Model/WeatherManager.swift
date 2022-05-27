@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 protocol WeatherManagerDelegate {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel)
@@ -17,10 +18,15 @@ struct WeatherManager {
     
     var delegate: WeatherManagerDelegate?
     
-    func fetchWeather(cityName: String) {
+    func fetchWeather(cityName: String) {                 // принимает  имя города и создает url
         let urlString = "\(weatherURL)&q=\(cityName)"
         print(urlString)
         performRequest (with: urlString)
+    }
+    
+    func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+        let urlString = "\(weatherURL)&lat=\(latitude)&lon=\(longitude)"
+        performRequest(with: urlString)
     }
     
     func performRequest (with urlString: String) {   //выполнить запрос
@@ -38,38 +44,38 @@ struct WeatherManager {
                     if let weather = self.parseJSON(safeData) {
                         self.delegate?.didUpdateWeather(self, weather: weather)
                     }
-                    }
                 }
-                // 4 start the task
-                task.resume()
             }
-            
+            // 4 start the task
+            task.resume()
         }
-        func parseJSON(_ weatherData: Data) -> WeatherModel? {
-            let decoder = JSONDecoder()
+        
+    }
+    func parseJSON(_ weatherData: Data) -> WeatherModel? {
+        let decoder = JSONDecoder()
+        
+        do {
+            let decodedData = try decoder.decode(WeatherData.self, from: weatherData)
+            print(decodedData.main.temp)
+            print(decodedData.weather.description)
+            print(decodedData.weather[0].id)
+            let id = decodedData.weather[0].id
+            let temp = decodedData.main.temp
+            let name = decodedData.name
             
-            do {
-                let decodedData = try decoder.decode(WeatherData.self, from: weatherData)
-                print(decodedData.main.temp)
-                print(decodedData.weather.description)
-                print(decodedData.weather[0].id)
-                let id = decodedData.weather[0].id
-                let temp = decodedData.main.temp
-                let name = decodedData.name
-                
-                let weather = WeatherModel(conditionId: id, cityName: name, temperature: temp)
-                return weather
-                print(weather.conditionName)
-                
-            } catch {
-                delegate?.didFailWithError(error: error)
-                return nil
-                
-            }
+            let weather = WeatherModel(conditionId: id, cityName: name, temperature: temp)
+            return weather
+            print(weather.conditionName)
+            
+        } catch {
+            delegate?.didFailWithError(error: error)
+            return nil
             
         }
         
     }
+    
+}
 
 
 
